@@ -1,3 +1,4 @@
-export default {
-  title: '中台admin'
+module.exports = {
+  title: '中台admin',
+  is4: false
 }

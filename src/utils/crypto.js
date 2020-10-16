@@ -3,8 +3,8 @@ import CryptoJS from 'crypto-js'
 /**
  * 加密
  * @param {string} message 需要加密的字符串
- * @param {string} key 秘钥
- * @return {string}
+ * @param {string} key 密钥
+ * @return {string} 加密字符串
  */
 export function encryptByDES(message, key) {
   const keyHex = CryptoJS.enc.Utf8.parse(key)
@@ -18,8 +18,8 @@ export function encryptByDES(message, key) {
 /**
  * 解密
  * @param {string} cipherText 密文
- * @param {string} key 秘钥
- * @return {string}
+ * @param {string} key 密钥
+ * @return {string} 解密字符串
  */
 export function decryptByDES(cipherText, key) {
   var keyHex = CryptoJS.enc.Utf8.parse(key)

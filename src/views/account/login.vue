@@ -5,7 +5,7 @@
       <el-card shadow="always" class="login-card" :body-style="{ padding: '0px' }">
         <div class="title">Admin</div>
         <div class="desc">admin 后台管理系统</div>
-        <el-form ref="form" :model="form" :rules="formRules">
+        <el-form ref="form" :model="form" :rules="formRules" size="medium">
           <el-form-item prop="userName">
             <el-input
               ref="userName"
@@ -13,8 +13,11 @@
               type="text"
               auto-complete="off"
               placeholder="账号"
+              @keyup.enter.native="onLogin"
             >
-              <i slot="prefix" class="el-input__icon el-icon-user" />
+              <template #prefix>
+                <i class="el-input__icon el-icon-user" />
+              </template>
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
@@ -27,7 +30,9 @@
               placeholder="密码"
               @keyup.enter.native="onLogin"
             >
-              <i slot="prefix" class="el-input__icon el-icon-lock" />
+              <template #prefix>
+                <i class="el-input__icon el-icon-lock" />
+              </template>
             </el-input>
           </el-form-item>
           <el-form-item prop="verifyCode">
@@ -43,10 +48,12 @@
               style="width:66%;"
               @keyup.enter.native="onLogin"
             >
-              <i slot="prefix" class="el-input__icon fa fa-shield" />
+              <template #prefix>
+                <i class="el-input__icon fa fa-shield" />
+              </template>
             </el-input>
             <img
-              :src="verifyCodeImg"
+              :src="verifyCodeUrl"
               alt
               style="width:33%;cursor: pointer;vertical-align: middle;"
               @click="getLoginVerifyCode"
@@ -75,7 +82,7 @@ export default {
   data() {
     return {
       form: {
-        userName: 'admin',
+        userName: 'user',
         password: '111111',
         verifyCode: '',
         verifyCodeKey: '',
@@ -87,14 +94,16 @@ export default {
         verifyCode: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
       },
       checked: true,
-      verifyCodeImg: '',
+      verifyCodeUrl: '',
       loginLoading: false,
       loginText: '登录'
     }
   },
+  created() {
+    this.getLoginVerifyCode()
+  },
   mounted() {
     this.$refs.verifyCode.focus()
-    this.getLoginVerifyCode()
     // window.localStorage.clear()
   },
   methods: {
@@ -127,24 +136,22 @@ export default {
         this.loginLoading = false
         this.loginText = '重新登录'
 
-        if (res.msg) {
-          this.$message({
-            message: res.msg,
-            type: 'error'
-          })
-        }
-
-        if (res.data === 1) {
-          this.getLoginVerifyCode()
-          this.$refs.verifyCode.focus()
-        } else if (res.data === 2) {
-          this.$refs.verifyCode.focus()
-        } else if (res.data === 3) {
-          this.getLoginVerifyCode()
-          this.$refs.userName.focus()
-        } else if (res.data === 4) {
-          this.getLoginVerifyCode()
-          this.$refs.password.focus()
+        switch (res.data) {
+          case 1:
+            this.getLoginVerifyCode()
+            this.$refs.verifyCode.focus()
+            break
+          case 2:
+            this.$refs.verifyCode.focus()
+            break
+          case 3:
+            this.getLoginVerifyCode()
+            this.$refs.userName.focus()
+            break
+          case 4:
+            this.getLoginVerifyCode()
+            this.$refs.password.focus()
+            break
         }
         return
       }
@@ -155,21 +162,9 @@ export default {
       const res = await this.$store.dispatch('user/getLoginInfo')
       this.loginLoading = false
 
-      if (!res) {
+      if (!res?.success) {
         this.loginLoading = false
         this.loginText = '重新登录'
-        return
-      }
-
-      if (!res.success) {
-        this.loginLoading = false
-        this.loginText = '重新登录'
-        if (res.msg) {
-          this.$message({
-            message: res.msg,
-            type: 'error'
-          })
-        }
         return
       }
 
@@ -192,7 +187,7 @@ export default {
       this.form.verifyCode = ''
       const res = await getVerifyCode({ lastKey: this.form.verifyCodeKey })
       if (res && res.success) {
-        this.verifyCodeImg = 'data:image/png;base64,' + res.data.img
+        this.verifyCodeUrl = 'data:image/png;base64,' + res.data.img
         this.form.verifyCodeKey = res.data.key
       }
     }
@@ -208,10 +203,10 @@ export default {
   background: linear-gradient(to bottom right, #3a8ee6 0, #3a8ee6);
   opacity: 0.8;
 }
-.bg >>> .el-scrollbar__view {
+.bg ::v-deep .el-scrollbar__view {
   height: 100%;
 }
-.verifyCode >>> .el-input__inner {
+.verifyCode ::v-deep .el-input__inner {
   letter-spacing: 2px;
 }
 
@@ -223,7 +218,7 @@ export default {
 </style>
 <style lang="scss" scoped>
 .login-card {
-  width: 350px;
+  width: 320px;
   padding: 25px 25px 5px 25px;
   position: relative;
   margin: 0 auto;

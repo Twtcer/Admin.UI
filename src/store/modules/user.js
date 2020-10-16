@@ -7,25 +7,31 @@ import { resetRouter, addRoutes } from '@/router'
 const state = {
   token: getToken(),
   name: '',
-  avatar: require('@/assets/avatar.png'),
-  menus: []
+  avatar: require('@/assets/images/avatar.png'),
+  menus: [],
+  permissions: []
 }
 
 const mutations = {
   setToken: (state, token) => {
     state.token = token
+    setToken(token)
   },
   setName: (state, name) => {
     state.name = name
   },
   setAvatar: (state, avatar) => {
     if (avatar) {
-      avatar = process.env.VUE_APP_AVATAR_URL + avatar
+      state.avatar = process.env.VUE_APP_AVATAR_URL + avatar
+    } else {
+      state.avatar = require('@/assets/images/avatar.png')
     }
-    state.avatar = avatar
   },
   setMenus: (state, menus) => {
     state.menus = menus
+  },
+  setPermissions: (state, permissions) => {
+    state.permissions = permissions
   }
 }
 
@@ -41,7 +47,6 @@ const actions = {
     if (res && res.success) {
       const token = res.data.token
       commit('setToken', token)
-      setToken(token)
     }
 
     return res
@@ -51,10 +56,11 @@ const actions = {
     const res = await getLoginInfo()
     if (res && res.success) {
       const user = res.data.user
-      const name = user.nickName ? user.nickName : user.name
+      const name = user.nickName ? user.nickName : user.userName
       commit('setName', name)
       commit('setAvatar', user.avatar)
       commit('setMenus', res.data.menus)
+      commit('setPermissions', res.data.permissions)
       addRoutes(res.data.menus)
       // localStorage.setItem('loginInfo', JSON.stringify(res.data))
     }
@@ -67,7 +73,7 @@ const actions = {
     if (loginInfo) {
       loginInfo = JSON.parse(loginInfo)
       const user = loginInfo.user
-      const name = user.nickName ? user.nickName : user.name
+      const name = user.nickName ? user.nickName : user.userName
       commit('setName', name)
       commit('setAvatar', user.avatar)
       commit('setMenus', loginInfo.menus)
